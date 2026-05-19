@@ -10,6 +10,12 @@ const employees = [
   { id: "e3", name: "Alex Turner", department: "Design", role: "UI/UX Designer", initialLevel: "L2" },
 ];
 
+const levelNames: Record<string, string> = {
+  "L2": "L2 - Associate",
+  "L3": "L3 - Senior Associate",
+  "L4": "L4 - Principal",
+};
+
 export default function AssessmentFormPage() {
   // Employee Selection State
   const [selectedEmp, setSelectedEmp] = useState(employees[0]);
@@ -346,7 +352,9 @@ export default function AssessmentFormPage() {
                   <span className="absolute -left-[31px] top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-muted border-2 border-border"></span>
                   <div className="flex flex-col">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Older Level (Initial)</span>
-                    <span className="text-sm font-semibold text-foreground mt-0.5">{selectedEmp.initialLevel}</span>
+                    <span className="text-sm font-semibold text-foreground mt-0.5">
+                      {levelNames[selectedEmp.initialLevel] || selectedEmp.initialLevel}
+                    </span>
                   </div>
                 </div>
 
@@ -356,7 +364,7 @@ export default function AssessmentFormPage() {
                   <div className="flex flex-col">
                     <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wide">Previous Level</span>
                     <span className="text-sm font-semibold text-foreground mt-0.5">
-                      {levelHistory.length > 1 ? levelHistory[levelHistory.length - 2] : selectedEmp.initialLevel}
+                      {levelNames[levelHistory.length > 1 ? levelHistory[levelHistory.length - 2] : selectedEmp.initialLevel] || selectedEmp.initialLevel}
                     </span>
                   </div>
                 </div>
@@ -367,7 +375,7 @@ export default function AssessmentFormPage() {
                   <div className="flex flex-col">
                     <span className="text-[10px] font-bold text-primary uppercase tracking-wide">Current Level</span>
                     <span className="text-sm font-bold text-primary dark:text-primary-foreground mt-0.5">
-                      {level}
+                      {levelNames[level] || level}
                     </span>
                   </div>
                 </div>
