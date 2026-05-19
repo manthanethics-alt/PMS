@@ -20,7 +20,9 @@ export default function AssessmentFormPage() {
   // Employee Selection State
   const [selectedEmp, setSelectedEmp] = useState(employees[0]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isLevelDropdownOpen, setIsLevelDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [levelSearchQuery, setLevelSearchQuery] = useState("");
   
   const [level, setLevel] = useState(employees[0].initialLevel);
   const [levelHistory, setLevelHistory] = useState<string[]>([employees[0].initialLevel]);
@@ -88,6 +90,10 @@ export default function AssessmentFormPage() {
     emp.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const filteredLevels = Object.entries(levelNames).filter(([key, name]) => 
+    name.toLowerCase().includes(levelSearchQuery.toLowerCase())
+  );
+
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
       
@@ -124,7 +130,10 @@ export default function AssessmentFormPage() {
           
           <div 
             className="input-field cursor-pointer flex items-center justify-between bg-muted/30"
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            onClick={() => {
+              setIsDropdownOpen(!isDropdownOpen);
+              setIsLevelDropdownOpen(false);
+            }}
           >
             <span className="font-medium">{selectedEmp.name}</span>
             <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -155,7 +164,9 @@ export default function AssessmentFormPage() {
                       setLevelHistory([emp.initialLevel]);
                       setShowUnionAlert(false);
                       setIsDropdownOpen(false);
+                      setIsLevelDropdownOpen(false);
                       setSearchQuery("");
+                      setLevelSearchQuery("");
                     }}
                   >
                     {emp.name}
@@ -181,7 +192,7 @@ export default function AssessmentFormPage() {
             {selectedEmp.role}
           </div>
         </div>
-        <div className="space-y-1">
+        <div className="space-y-1 relative">
           <label className="text-xs font-semibold text-primary/70 dark:text-primary/90 uppercase tracking-wider flex items-center justify-between">
             <span>Level</span>
             <button
@@ -192,15 +203,62 @@ export default function AssessmentFormPage() {
               <History className="h-2.5 w-2.5" /> Level History
             </button>
           </label>
-          <select 
-            value={level} 
-            onChange={handleLevelChange}
-            className="input-field bg-primary/5 border-primary/20 focus:border-primary font-medium text-primary dark:text-primary-foreground"
+          
+          <div 
+            className="input-field cursor-pointer flex items-center justify-between bg-primary/5 border-primary/20 focus:border-primary text-primary dark:text-primary-foreground font-medium"
+            onClick={() => {
+              setIsLevelDropdownOpen(!isLevelDropdownOpen);
+              setIsDropdownOpen(false);
+            }}
           >
-            <option value="L2">L2 - Associate</option>
-            <option value="L3">L3 - Senior Associate</option>
-            <option value="L4">L4 - Principal</option>
-          </select>
+            <span>{levelNames[level] || level}</span>
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          </div>
+
+          {isLevelDropdownOpen && (
+            <div className="absolute top-full left-0 mt-1 w-full bg-card border rounded-md shadow-lg z-50 overflow-hidden">
+              <div className="p-2 border-b bg-muted/20 flex items-center px-3">
+                <Search className="h-4 w-4 text-muted-foreground mr-2 shrink-0" />
+                <input 
+                  type="text"
+                  autoFocus
+                  placeholder="Search level..." 
+                  className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground h-8"
+                  value={levelSearchQuery}
+                  onChange={(e) => setLevelSearchQuery(e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+              <div className="max-h-48 overflow-y-auto py-1">
+                {filteredLevels.length > 0 ? filteredLevels.map(([key, name]) => (
+                  <div 
+                    key={key}
+                    className="px-3 py-2 text-sm hover:bg-muted cursor-pointer flex items-center justify-between"
+                    onClick={() => {
+                      setLevel(key);
+                      setLevelHistory(prev => {
+                        if (prev[prev.length - 1] === key) return prev;
+                        return [...prev, key];
+                      });
+                      if (key !== selectedEmp.initialLevel) {
+                        setShowUnionAlert(true);
+                      } else {
+                        setShowUnionAlert(false);
+                      }
+                      setIsLevelDropdownOpen(false);
+                      setLevelSearchQuery("");
+                    }}
+                  >
+                    {name}
+                    {level === key && <Check className="h-4 w-4 text-primary" />}
+                  </div>
+                )) : (
+                  <div className="px-3 py-3 text-sm text-muted-foreground text-center">No levels found</div>
+                )}
+              </div>
+            </div>
+          )}
+          
           {level !== selectedEmp.initialLevel && (
             <div className="flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400 font-semibold animate-in fade-in slide-in-from-top-1 duration-200">
               <span className="text-[10px] text-muted-foreground font-normal">Evaluating change: {selectedEmp.initialLevel} ➔ {level}</span>
@@ -290,13 +348,13 @@ export default function AssessmentFormPage() {
                         {/* Status Dropdown */}
                         <div className="w-40 px-2 pt-1">
                           <select 
-                            className={`input-field font-medium text-xs h-8 ${statusConfig ? statusConfig.color : 'text-muted-foreground bg-background'}`}
+                            className={`input-field font-medium text-xs h-8 bg-white dark:bg-zinc-950 ${statusConfig ? statusConfig.color : 'text-muted-foreground bg-background'}`}
                             value={currentStatus}
                             onChange={(e) => setStatusValues({...statusValues, [rr.id]: e.target.value})}
                           >
-                            <option value="" disabled>Select status...</option>
+                            <option value="" disabled className="bg-white dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400">Select status...</option>
                             {statuses.map(s => (
-                              <option key={s.id} value={s.id}>{s.label}</option>
+                              <option key={s.id} value={s.id} className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">{s.label}</option>
                             ))}
                           </select>
                         </div>
