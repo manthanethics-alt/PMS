@@ -92,6 +92,14 @@
   body {
     @apply bg-background text-foreground font-sans text-sm antialiased;
   }
+  select {
+    color: var(--foreground);
+    background-color: var(--background);
+  }
+  select option {
+    background-color: var(--card) !important;
+    color: var(--card-foreground) !important;
+  }
 }
 
 @layer components {
