@@ -59,7 +59,7 @@
     --radius: 0.5rem;
   }
 
-  .dark {
+  :root.dark {
     /* Matching Calm Dark Theme */
     --background: #111827; /* gray-900 */
     --foreground: #f9fafb; /* gray-50 */
