@@ -1,13 +1,13 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { Save, Send, AlertTriangle, Info, ChevronDown, ChevronRight, Check, Search } from "lucide-react";
+import { Save, Send, AlertTriangle, Info, ChevronDown, ChevronRight, Check, Search, History } from "lucide-react";
 import Link from "next/link";
 
 // Mock Employee Data
 const employees = [
-  { id: "e1", name: "John Smith", department: "Engineering", role: "Frontend Developer" },
-  { id: "e2", name: "Sarah Williams", department: "Product", role: "Product Manager" },
-  { id: "e3", name: "Alex Turner", department: "Design", role: "UI/UX Designer" },
+  { id: "e1", name: "John Smith", department: "Engineering", role: "Frontend Developer", initialLevel: "L2" },
+  { id: "e2", name: "Sarah Williams", department: "Product", role: "Product Manager", initialLevel: "L3" },
+  { id: "e3", name: "Alex Turner", department: "Design", role: "UI/UX Designer", initialLevel: "L2" },
 ];
 
 export default function AssessmentFormPage() {
@@ -16,7 +16,7 @@ export default function AssessmentFormPage() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   
-  const [level, setLevel] = useState("L2");
+  const [level, setLevel] = useState(employees[0].initialLevel);
   const [showUnionAlert, setShowUnionAlert] = useState(false);
   const [statusValues, setStatusValues] = useState<Record<string, string>>({
     "r1": "met",
@@ -43,7 +43,8 @@ export default function AssessmentFormPage() {
       responsibilities: [
         { id: "r1", desc: "Delivers high-quality code adhering to project standards and best practices.", level: "L2" },
         { id: "r2", desc: "Resolves complex technical issues and bugs within agreed SLAs.", level: "L2" },
-        ...(level === "L3" ? [{ id: "r3", desc: "Architects scalable solutions for new feature requests.", level: "L3", isNew: true }] : [])
+        ...((level === "L3" || level === "L4") ? [{ id: "r3", desc: "Architects scalable solutions for new feature requests.", level: "L3", isNew: selectedEmp.initialLevel === "L2" }] : []),
+        ...(level === "L4" ? [{ id: "r6", desc: "Sets enterprise architectural standards and organizational roadmap.", level: "L4", isNew: true }] : [])
       ]
     },
     {
@@ -51,14 +52,15 @@ export default function AssessmentFormPage() {
       name: "Leadership & Mentoring",
       responsibilities: [
         { id: "r4", desc: "Provides technical guidance to junior team members.", level: "L2" },
-        ...(level === "L3" ? [{ id: "r5", desc: "Leads technical discussions and cross-team architecture reviews.", level: "L3", isNew: true }] : [])
+        ...((level === "L3" || level === "L4") ? [{ id: "r5", desc: "Leads technical discussions and cross-team architecture reviews.", level: "L3", isNew: selectedEmp.initialLevel === "L2" }] : []),
+        ...(level === "L4" ? [{ id: "r7", desc: "Defines cross-organizational mentorship frameworks and engineering culture.", level: "L4", isNew: true }] : [])
       ]
     }
   ];
 
   const handleLevelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setLevel(e.target.value);
-    if (e.target.value !== "L2") {
+    if (e.target.value !== selectedEmp.initialLevel) {
       setShowUnionAlert(true);
     } else {
       setShowUnionAlert(false);
@@ -136,6 +138,8 @@ export default function AssessmentFormPage() {
                     className="px-3 py-2 text-sm hover:bg-muted cursor-pointer flex items-center justify-between"
                     onClick={() => {
                       setSelectedEmp(emp);
+                      setLevel(emp.initialLevel);
+                      setShowUnionAlert(false);
                       setIsDropdownOpen(false);
                       setSearchQuery("");
                     }}
@@ -164,7 +168,14 @@ export default function AssessmentFormPage() {
           </div>
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-primary/70 dark:text-primary/90 uppercase tracking-wider">Level</label>
+          <label className="text-xs font-semibold text-primary/70 dark:text-primary/90 uppercase tracking-wider flex items-center justify-between">
+            <span>Level</span>
+            {level !== selectedEmp.initialLevel && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-900/50 uppercase tracking-wider animate-in fade-in duration-200">
+                <History className="h-2.5 w-2.5" /> Was: {selectedEmp.initialLevel}
+              </span>
+            )}
+          </label>
           <select 
             value={level} 
             onChange={handleLevelChange}
@@ -172,7 +183,13 @@ export default function AssessmentFormPage() {
           >
             <option value="L2">L2 - Associate</option>
             <option value="L3">L3 - Senior Associate</option>
+            <option value="L4">L4 - Principal</option>
           </select>
+          {level !== selectedEmp.initialLevel && (
+            <div className="flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400 font-semibold animate-in fade-in slide-in-from-top-1 duration-200">
+              <span className="text-[10px] text-muted-foreground font-normal">Evaluating change: {selectedEmp.initialLevel} ➔ {level}</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -183,7 +200,7 @@ export default function AssessmentFormPage() {
           <div>
             <h4 className="font-semibold text-sm">Level Change Detected (Union Mode Active)</h4>
             <p className="text-sm mt-1 opacity-90">
-              You are now evaluating {selectedEmp.name} across merged criteria from their previous level (L2) and the new level (L3). Previously saved values for L2 responsibilities have been retained.
+              You are now evaluating {selectedEmp.name} across merged criteria from their previous level ({selectedEmp.initialLevel}) and the new level ({level}). Previously saved values for {selectedEmp.initialLevel} responsibilities have been retained.
             </p>
           </div>
         </div>
