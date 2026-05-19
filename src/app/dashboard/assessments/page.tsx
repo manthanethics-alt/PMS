@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { Save, Send, AlertTriangle, Info, ChevronDown, ChevronRight, Check, Search, History } from "lucide-react";
+import { Save, Send, AlertTriangle, Info, ChevronDown, ChevronRight, Check, Search, History, X } from "lucide-react";
 import Link from "next/link";
 
 // Mock Employee Data
@@ -17,6 +17,8 @@ export default function AssessmentFormPage() {
   const [searchQuery, setSearchQuery] = useState("");
   
   const [level, setLevel] = useState(employees[0].initialLevel);
+  const [levelHistory, setLevelHistory] = useState<string[]>([employees[0].initialLevel]);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [showUnionAlert, setShowUnionAlert] = useState(false);
   const [statusValues, setStatusValues] = useState<Record<string, string>>({
     "r1": "met",
@@ -59,8 +61,13 @@ export default function AssessmentFormPage() {
   ];
 
   const handleLevelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setLevel(e.target.value);
-    if (e.target.value !== selectedEmp.initialLevel) {
+    const nextLevel = e.target.value;
+    setLevel(nextLevel);
+    setLevelHistory(prev => {
+      if (prev[prev.length - 1] === nextLevel) return prev;
+      return [...prev, nextLevel];
+    });
+    if (nextLevel !== selectedEmp.initialLevel) {
       setShowUnionAlert(true);
     } else {
       setShowUnionAlert(false);
@@ -139,6 +146,7 @@ export default function AssessmentFormPage() {
                     onClick={() => {
                       setSelectedEmp(emp);
                       setLevel(emp.initialLevel);
+                      setLevelHistory([emp.initialLevel]);
                       setShowUnionAlert(false);
                       setIsDropdownOpen(false);
                       setSearchQuery("");
@@ -170,11 +178,13 @@ export default function AssessmentFormPage() {
         <div className="space-y-1">
           <label className="text-xs font-semibold text-primary/70 dark:text-primary/90 uppercase tracking-wider flex items-center justify-between">
             <span>Level</span>
-            {level !== selectedEmp.initialLevel && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-900/50 uppercase tracking-wider animate-in fade-in duration-200">
-                <History className="h-2.5 w-2.5" /> Was: {selectedEmp.initialLevel}
-              </span>
-            )}
+            <button
+              type="button"
+              onClick={() => setIsHistoryModalOpen(true)}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50 hover:dark:bg-amber-950/50 uppercase tracking-wider transition-colors cursor-pointer"
+            >
+              <History className="h-2.5 w-2.5" /> Level History
+            </button>
           </label>
           <select 
             value={level} 
@@ -304,6 +314,85 @@ export default function AssessmentFormPage() {
           ))}
         </div>
       </div>
+
+      {/* Level History Modal */}
+      {isHistoryModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-card w-full max-w-md rounded-xl shadow-xl border overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="font-semibold text-lg text-foreground flex items-center gap-2">
+                <History className="h-5 w-5 text-amber-500" />
+                Level Change History
+              </h3>
+              <button 
+                onClick={() => setIsHistoryModalOpen(false)}
+                className="p-1 rounded-md text-muted-foreground hover:bg-muted transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              <div className="text-center pb-4 border-b">
+                <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Active Evaluation</p>
+                <h4 className="text-base font-bold mt-1">{selectedEmp.name}</h4>
+                <p className="text-xs text-muted-foreground">{selectedEmp.role} • {selectedEmp.department}</p>
+              </div>
+
+              {/* Timeline Flow */}
+              <div className="relative pl-6 space-y-6 border-l border-border/85 ml-2 py-1">
+                {/* Older / Initial Level */}
+                <div className="relative">
+                  <span className="absolute -left-[31px] top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-muted border-2 border-border"></span>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Older Level (Initial)</span>
+                    <span className="text-sm font-semibold text-foreground mt-0.5">{selectedEmp.initialLevel}</span>
+                  </div>
+                </div>
+
+                {/* Previous Level */}
+                <div className="relative">
+                  <span className="absolute -left-[31px] top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-100 border-2 border-amber-500"></span>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wide">Previous Level</span>
+                    <span className="text-sm font-semibold text-foreground mt-0.5">
+                      {levelHistory.length > 1 ? levelHistory[levelHistory.length - 2] : selectedEmp.initialLevel}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Current Level */}
+                <div className="relative">
+                  <span className="absolute -left-[31px] top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary border-2 border-primary-foreground"></span>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold text-primary uppercase tracking-wide">Current Level</span>
+                    <span className="text-sm font-bold text-primary dark:text-primary-foreground mt-0.5">
+                      {level}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Timeline Sequence */}
+              <div className="bg-muted/30 p-3 rounded-lg border text-xs flex flex-wrap items-center gap-1.5">
+                <span className="font-semibold text-muted-foreground shrink-0">Sequence:</span>
+                {levelHistory.map((lvl, index) => (
+                  <span key={index} className="flex items-center gap-1.5">
+                    {index > 0 && <span className="text-muted-foreground/60">➔</span>}
+                    <span className={`px-1.5 py-0.5 rounded font-bold ${index === levelHistory.length - 1 ? 'bg-primary text-primary-foreground' : 'bg-background border'}`}>
+                      {lvl}
+                    </span>
+                  </span>
+                ))}
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-end p-4 border-t bg-muted/20">
+              <button onClick={() => setIsHistoryModalOpen(false)} className="btn-primary">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
