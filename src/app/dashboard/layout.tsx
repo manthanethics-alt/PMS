@@ -1,5 +1,6 @@
 "use client";
-import { LayoutDashboard, Users, Settings, LogOut, Search, Bell, Building2, History, Users2, Shield } from "lucide-react";
+import { useState, useEffect } from "react";
+import { LayoutDashboard, Users, Settings, LogOut, Search, Bell, Building2, History, Users2, Shield, Sun, Moon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -10,6 +11,20 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    const isDark = document.documentElement.classList.contains("dark");
+    setTheme(isDark ? "dark" : "light");
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "light" ? "dark" : "light";
+    setTheme(nextTheme);
+    localStorage.setItem("theme", nextTheme);
+    document.documentElement.classList.toggle("dark", nextTheme === "dark");
+  };
 
   const navItems = [
     { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -92,6 +107,17 @@ export default function DashboardLayout({
                 />
               </div>
             </div>
+            <button 
+              onClick={toggleTheme} 
+              className="btn-ghost size-8 p-0 rounded-full flex items-center justify-center relative hover:bg-muted transition-colors"
+              aria-label="Toggle Theme"
+            >
+              {theme === "light" ? (
+                <Moon className="h-4.5 w-4.5 text-muted-foreground hover:text-foreground transition-colors" />
+              ) : (
+                <Sun className="h-4.5 w-4.5 text-muted-foreground hover:text-foreground transition-colors" />
+              )}
+            </button>
             <button className="btn-ghost size-8 p-0 rounded-full relative">
               <Bell className="h-4 w-4 text-muted-foreground" />
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-destructive rounded-full"></span>

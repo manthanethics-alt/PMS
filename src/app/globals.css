@@ -59,31 +59,29 @@
     --radius: 0.5rem;
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      /* Matching Calm Dark Theme */
-      --background: #111827; /* gray-900 */
-      --foreground: #f9fafb; /* gray-50 */
+  .dark {
+    /* Matching Calm Dark Theme */
+    --background: #111827; /* gray-900 */
+    --foreground: #f9fafb; /* gray-50 */
 
-      --muted: #1f2937; /* gray-800 */
-      --muted-foreground: #9ca3af; /* gray-400 */
-      
-      --card: #1f2937; /* gray-800 */
-      --card-foreground: #f9fafb;
+    --muted: #1f2937; /* gray-800 */
+    --muted-foreground: #9ca3af; /* gray-400 */
+    
+    --card: #1f2937; /* gray-800 */
+    --card-foreground: #f9fafb;
 
-      --border: #374151; /* gray-700 */
-      --input: #374151;
-      --ring: #3b82f6; /* blue-500 */
+    --border: #374151; /* gray-700 */
+    --input: #374151;
+    --ring: #3b82f6; /* blue-500 */
 
-      --primary: #3b82f6; /* blue-500 */
-      --primary-foreground: #ffffff;
+    --primary: #3b82f6; /* blue-500 */
+    --primary-foreground: #ffffff;
 
-      --secondary: #374151; /* gray-700 */
-      --secondary-foreground: #f9fafb;
+    --secondary: #374151; /* gray-700 */
+    --secondary-foreground: #f9fafb;
 
-      --destructive: #7f1d1d;
-      --destructive-foreground: #f8fafc;
-    }
+    --destructive: #7f1d1d;
+    --destructive-foreground: #f8fafc;
   }
 }
 
