@@ -3,7 +3,6 @@ import { useState } from "react";
 import { UserPlus, Search, Edit, Lock, Mail, Users2, Shield, X } from "lucide-react";
 
 export default function UsersPage() {
-  const [activeTab, setActiveTab] = useState("users");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const users = [
@@ -38,22 +37,7 @@ export default function UsersPage() {
         </div>
       </div>
 
-      <div className="card">
-        {/* Tabs */}
-        <div className="flex border-b">
-          <button
-            onClick={() => setActiveTab("users")}
-            className={`h-11 px-6 text-sm font-medium transition-colors border-b-2 -mb-px flex items-center gap-2 ${activeTab === "users" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
-          >
-            <Users2 className="h-4 w-4" /> User Accounts
-          </button>
-          <button
-            onClick={() => setActiveTab("mapping")}
-            className={`h-11 px-6 text-sm font-medium transition-colors border-b-2 -mb-px flex items-center gap-2 ${activeTab === "mapping" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
-          >
-            <Shield className="h-4 w-4" /> Manager Mapping
-          </button>
-        </div>
+      <div className="card overflow-hidden">
 
         {/* Toolbar */}
         <div className="p-4 flex items-center gap-4 border-b bg-muted/20">
